@@ -1,6 +1,8 @@
 # COCO Eats (맛집 MAP)
 
 ![스크린샷](https://velog.velcdn.com/images/yoonddubi/post/db642273-1b67-46e4-bad6-4657053969e7/image.png)
+[todayeats.webm](https://github.com/user-attachments/assets/e53110c7-79b6-4457-afa8-2ada316cd96c)
+
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](#)
 [![Vite](https://img.shields.io/badge/Vite-%5E5-646CFF?logo=vite&logoColor=white)](#)
