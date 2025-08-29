@@ -9,8 +9,8 @@
 [![FramerMotion](https://img.shields.io/badge/Framer%20Motion-%5E11-FF0050?logo=framer&logoColor=white)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](#)
 
-> **DaisyUI**로 다크 테마 디자인을 빠르게 구성하고, **Framer Motion**으로 
-> 카드/히어로/모달에 부드러운 인터랙션을 더한 맛집 큐레이션 웹앱입니다.
+> **DaisyUI**로 다크 테마 디자인을 빠르게 구성하고, **Framer Motion**으로  
+> 카드/히어로/모달에 부드러운 인터랙션을 더한 맛집 큐레이션 웹앱입니다.  
 > BE(포트 3000)에서 기본 맛집 데이터를 제공하고, FE는 목록/검색/필터/모달 상세를 제공합니다.
 
 ------------------------------------------------------------------------
