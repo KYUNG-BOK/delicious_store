@@ -11,7 +11,7 @@ export function adaptPlace(p: BEPlace): Restaurant {
     "카테고리";
 
   const price: Restaurant["price"] = "₩₩";
-  const time = "10:00 - 21:00";
+  const time = "18:00 - 21:00";
   const distanceKm = Math.random() * 3 + 0.3;
   const img = `${IMG_BASE}/${p.image.src}`;
 
