@@ -7,9 +7,7 @@ import MapAside from "../components/MapAside";
 import BottomNav from "../components/BottomNav";
 import FooterBar from "../components/FooterBar";
 import { CATEGORIES, type Restaurant, type BEPlace } from "../types";
-import { fetchPlaces } from "../lib/api";
 import { adaptPlace, FALLBACK } from "../lib/adapt";
-import { spring } from "../lib/animations";
 import DetailModal from "../components/DetailModal";
 
 export default function RestaurantMainPage() {
@@ -23,7 +21,6 @@ export default function RestaurantMainPage() {
   const [sort, setSort] = useState<"reco" | "rating" | "distance">("reco");
   const [onlyOpen, setOnlyOpen] = useState(false);
 
-  // 데이터 로드
   const [places, setPlaces] = useState<Restaurant[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -34,16 +31,18 @@ export default function RestaurantMainPage() {
     setDetailItem(item);
     setDetailOpen(true);
   };
-  const closeDetail = () => {
-    setDetailOpen(false);
-  };
+  const closeDetail = () => setDetailOpen(false);
 
+  // 데이터 불러오기
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const json = await fetchPlaces(); // { places: BEPlace[] }
-        const adapted = (json.places as BEPlace[]).map(adaptPlace);
+        const res = await fetch("/places");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json: { places: BEPlace[] } = await res.json();
+        const adapted = json.places.map(adaptPlace);
         if (alive) setPlaces(adapted);
       } catch {
         if (alive) setPlaces(FALLBACK);
@@ -51,7 +50,9 @@ export default function RestaurantMainPage() {
         if (alive) setLoaded(true);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, []);
 
   // 필터/정렬
@@ -86,10 +87,8 @@ export default function RestaurantMainPage() {
 
   return (
     <div className="min-h-screen bg-base-200 text-base-content">
-      {/* 네비 */}
       <Navbar />
 
-      {/* 히어로 영역 (검색/카테고리) */}
       <Hero
         q={q}
         setQ={setQ}
@@ -101,7 +100,6 @@ export default function RestaurantMainPage() {
         setCat={setCat}
       />
 
-      {/* 본문 */}
       <main className="mx-auto grid max-w-6xl grid-cols-1 gap-6 p-4 lg:grid-cols-[1fr_420px]">
         <section>
           <div className="mb-2 flex items-center justify-between">
@@ -113,30 +111,61 @@ export default function RestaurantMainPage() {
             </div>
           </div>
 
+          {/* --- 로딩중 표시하기 --- */}
+          {!loaded && (
+            <div className="w-full">
+              <progress className="progress progress-primary w-full"></progress>
+              <p className="mt-2 text-center text-sm text-base-content/70 animate-pulse">
+                맛집 데이터를 불러오고 있어요...
+              </p>
+            </div>
+          )}
+
+          {/* --- 결과 없음 --- */}
+          {loaded && filtered.length === 0 && (
+            <div className="p-6 text-center opacity-70">
+              검색 조건에 맞는 맛집이 없어요. 키워드를 바꿔보세요!
+            </div>
+          )}
+
+          {/* --- 목록/스켈레톤 --- */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <AnimatePresence mode="popLayout">
-              {(loaded ? filtered : []).map((item) => (
-                <RestaurantCard 
-                    key={item.id} 
-                    item={item}
-                    onDetail={openDetail}
-                />
-              ))}
+              {loaded
+                ? filtered.map((item) => (
+                    <RestaurantCard
+                      key={item.id}
+                      item={item}
+                      onDetail={openDetail}
+                    />
+                  ))
+                : Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={`skeleton-${i}`}
+                      className="card bg-base-100 shadow-md overflow-hidden animate-pulse"
+                    >
+                      <div className="h-48 skeleton w-full" />
+                      <div className="card-body">
+                        <div className="skeleton h-5 w-2/3" />
+                        <div className="skeleton h-4 w-1/3 mt-2" />
+                        <div className="mt-3 flex gap-2">
+                          <div className="skeleton h-6 w-16 rounded-full" />
+                          <div className="skeleton h-6 w-20 rounded-full" />
+                        </div>
+                        <div className="mt-4 flex justify-between items-center">
+                          <div className="skeleton h-4 w-16" />
+                          <div className="flex gap-2">
+                            <div className="skeleton h-8 w-16 rounded-lg" />
+                            <div className="skeleton h-8 w-16 rounded-lg" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
             </AnimatePresence>
-
-            {/* 로딩 자리 고정 */}
-            {!loaded && (
-              <div className="opacity-0 select-none">
-                <div className="card bg-base-100 shadow-md">
-                  <div className="h-48" />
-                  <div className="card-body" />
-                </div>
-              </div>
-            )}
           </div>
         </section>
 
-        {/* 지도/사이드 */}
         <MapAside />
       </main>
 
@@ -151,7 +180,6 @@ export default function RestaurantMainPage() {
         </motion.button>
       </div>
 
-      {/* 하단 탭 & 푸터 */}
       <BottomNav />
       <FooterBar />
 

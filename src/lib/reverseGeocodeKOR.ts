@@ -12,7 +12,6 @@ export async function reverseGeocodeKOR(lat: number, lon: number) {
 
   const resp = await fetch(`/naver/revgeo?${qs.toString()}`);
 
-  
   const raw = await resp.text();
 
   if (!resp.ok) {

@@ -2,12 +2,14 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RestaurantMainPage from "./pages/RestaurantMainPage";
+import ErrorPage from "./pages/ErrorPage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RestaurantMainPage />} />
+        <Route path="*" element={<ErrorPage kind="404" />} />
       </Routes>
     </BrowserRouter>
   );
