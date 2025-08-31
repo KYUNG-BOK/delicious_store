@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function BottomNav() {
   return (
     <div className="btm-nav lg:hidden bg-neutral text-neutral-content">

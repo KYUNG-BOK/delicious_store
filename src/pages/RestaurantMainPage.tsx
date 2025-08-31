@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
@@ -9,8 +9,16 @@ import FooterBar from "../components/FooterBar";
 import { CATEGORIES, type Restaurant, type BEPlace } from "../types";
 import { adaptPlace, FALLBACK } from "../lib/adapt";
 import DetailModal from "../components/DetailModal";
+import { useGeolocation } from "../lib/useGeolocation";
+
 
 export default function RestaurantMainPage() {
+  const geo = useGeolocation({ enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
+  const origin =
+    geo.status === "success"
+      ? { lat: geo.coords.latitude, lon: geo.coords.longitude }
+      : undefined;
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", "dark");
   }, []);
@@ -42,7 +50,7 @@ export default function RestaurantMainPage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json: { places: BEPlace[] } = await res.json();
-        const adapted = json.places.map(adaptPlace);
+        const adapted = json.places.map((p) => adaptPlace(p, origin));
         if (alive) setPlaces(adapted);
       } catch {
         if (alive) setPlaces(FALLBACK);
@@ -53,7 +61,7 @@ export default function RestaurantMainPage() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [origin]);
 
   // 필터/정렬
   const filtered = useMemo(() => {

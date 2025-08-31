@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import { spring } from "../lib/animations";
 import RatingStars from "./RatingStars";
@@ -10,6 +9,11 @@ type Props = {
   onDetail?: (item: Restaurant) => void;
 };
 
+/*
+  백엔드: 이미지 경로(src, alt)를 JSON에 담아서 응답
+  프론트(adaptPlace): IMG_BASE + src → 전체 URL로 변환
+  UI(RestaurantCard): <img src={item.img} /> 로 실제 화면에 출력
+*/
 export default function RestaurantCard({ item, onDetail }: Props) {
   return (
     <motion.article

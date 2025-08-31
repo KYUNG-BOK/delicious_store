@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import { fadeIn, spring } from "../lib/animations";
 import { CATEGORIES } from "../types";

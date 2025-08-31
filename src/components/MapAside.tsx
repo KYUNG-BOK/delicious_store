@@ -1,6 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGeolocation } from "../lib/useGeolocation";
 import { loadNaverMapsSDK } from "../lib/loadNaverMapsSDK";
+import { reverseGeocodeKOR } from "../lib/reverseGeocodeKOR";
+
+type AddrStatus =
+  | { state: "idle" }
+  | { state: "loading" }
+  | { state: "success"; address: string }
+  | { state: "empty" }                      
+  | { state: "error"; message: string }; 
 
 export default function MapAside() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -8,9 +16,12 @@ export default function MapAside() {
   const [map, setMap] = useState<any>(null);
   const [marker, setMarker] = useState<any>(null);
   const [sdkError, setSdkError] = useState<string | null>(null);
-  const { status, coords, message, code } = ((): any => {
+
+  const [addr, setAddr] = useState<AddrStatus>({ state: "idle" });
+
+ const { status, coords, message, code } = ((): any => {
     const state = useGeolocation(
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 } 
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
     if (state.status === "error") {
       return { status: "error", code: state.code, message: state.message };
@@ -21,7 +32,7 @@ export default function MapAside() {
         coords: { lat: state.coords.latitude, lon: state.coords.longitude },
       };
     }
-    return state; 
+    return state;
   })();
 
   useEffect(() => {
@@ -65,7 +76,7 @@ export default function MapAside() {
     marker.setPosition(latlng);
   }, [map, marker, coords]);
 
-  // 수동 재중심
+  // 수동으로 맞추기
   const recenter = () => {
     if (!("geolocation" in navigator) || !map || !marker) return;
     navigator.geolocation.getCurrentPosition(
@@ -80,6 +91,21 @@ export default function MapAside() {
       () => {},
       { enableHighAccuracy: true, maximumAge: 10_000, timeout: 10_000 }
     );
+  };
+
+  const refreshAddress = async () => {
+    if (!coords) return;
+    setAddr({ state: "loading" });
+    try {
+      const res = await reverseGeocodeKOR(coords.lat, coords.lon);
+      if (res.reason === "ok" && res.address) {
+        setAddr({ state: "success", address: res.address });
+      } else {
+        setAddr({ state: "empty" });
+      }
+    } catch (e: any) {
+      setAddr({ state: "error", message: e?.message ?? "주소 변환 실패" });
+    }
   };
 
   return (
@@ -97,7 +123,7 @@ export default function MapAside() {
             브라우저 위치 권한을 허용하면 내 위치에 마커가 표시됩니다.
           </p>
 
-          {/* 지도를 372 × 209에 맞춤 */}
+          {/* 지도사이즈 372 × 209에 맞춤 */}
           <div className="rounded-box overflow-hidden mx-auto w-full max-w-[372px]">
             <div
               ref={mapRef}
@@ -107,18 +133,58 @@ export default function MapAside() {
             />
           </div>
 
-          {/* 상태 */}
-          <div className="text-xs mt-2">
+        {/* 상태 / 주소 표시 */}
+          <div className="mt-3 space-y-1 text-sm">
             {sdkError && <div className="text-error">지도 오류: {sdkError}</div>}
-            {status === "loading" && <div>📡 위치 가져오는 중…</div>}
+
+            {status === "loading" && <div>📡 현재 위치 가져오는 중…</div>}
             {status === "error" && (
               <div className="text-warning">
                 위치 오류: {code} — {message || "가져올 수 없어요"}
               </div>
             )}
-            {status === "success" && coords && (
-              <div className="opacity-70">
-                좌표: {coords.lat.toFixed(5)}, {coords.lon.toFixed(5)}
+
+            {/* ✅ 주소가 출력되는 부분 */}
+            {status === "success" && (
+              <div className="mt-2">
+                <div className="text-xs uppercase opacity-60 mb-1">내 현재 위치</div>
+
+                {addr.state === "idle" && (
+                  <div className="opacity-70">대기 중…</div>
+                )}
+                {addr.state === "loading" && (
+                  <div className="opacity-70 animate-pulse">주소 변환 중입니다…</div>
+                )}
+                {addr.state === "success" && (
+                  <div className="font-medium break-words">
+                    📍 {addr.address}
+                  </div>
+                )}
+                {addr.state === "empty" && (
+                  <div className="opacity-70">주소를 찾지 못했어요.</div>
+                )}
+                {addr.state === "error" && (
+                  <div className="text-error">
+                    오류: {addr.message}
+                  </div>
+                )}
+
+                <div className="mt-1">
+                  <button
+                    className="btn btn-ghost btn-xs"
+                    onClick={refreshAddress}
+                    disabled={addr.state === "loading" || !coords}
+                  >
+                    주소 새로고침
+                  </button>
+                </div>
+
+                {/* 좌표도 표시데쓰 */}
+                {coords && (
+                  <div className="text-xs opacity-60 mt-1">
+                    (좌표: {coords.lat.toFixed(5)}, {coords.lon.toFixed(5)})
+                  </div>
+                )}
               </div>
             )}
           </div>

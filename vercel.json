@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/naver/revgeo", "destination": "/api/naver/revgeo" },
+    { "source": "/((?!api).*)", "destination": "/index.html" }
+  ]
+}

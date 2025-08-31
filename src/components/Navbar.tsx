@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Navbar() {
   return (
     <div className="navbar sticky top-0 z-50 bg-neutral text-neutral-content shadow-md border-b border-neutral">

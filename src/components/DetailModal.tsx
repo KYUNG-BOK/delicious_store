@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Restaurant } from "../types";
 import { motion } from "framer-motion";
 import { reverseGeocodeKOR } from "../lib/reverseGeocodeKOR";
@@ -30,7 +30,6 @@ export default function DetailModal({ open, onClose, item }: Props) {
     return () => el.removeEventListener("close", handleClose);
   }, [open, onClose]);
 
-  // 2) SDK 초기화 (placeholder)
   useEffect(() => {
     if (!open || !item?.lat || !item?.lon) return;
     // SDK 초기화

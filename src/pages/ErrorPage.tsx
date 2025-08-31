@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 type ErrorKind = "404" | "network" | "geo" | "500" | "custom";
