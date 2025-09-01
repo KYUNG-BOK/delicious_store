@@ -40,7 +40,7 @@ export function useGeolocation(
     cancelled.current = false;
     setState({ status: "loading" }); // 위치 요청 시작 → 로딩 상태
 
-    // 2) watchPosition으로 위치 변화를 지속적으로 감시
+    // 2) watchPosition으로 위치 변화를 실시간으로 감시
     watchIdRef.current = navigator.geolocation.watchPosition(
       pos => {
         if (cancelled.current) return;
@@ -77,11 +77,11 @@ export function useGeolocation(
           // 위치를 가져올 수 없음 (예: GPS 신호 없음)
           // → 재시도 가능하면 일정 시간 후 다시 실행
           if (err.code === err.POSITION_UNAVAILABLE && retryRef.current < maxRetries) {
-            const delay = Math.min(2000 * 2 ** retryRef.current, 8000); // 재시도 간격 (점점 늘어남)
+            const delay = Math.min(2000 * 2 ** retryRef.current, 8000); // 재시도 간격
             retryRef.current += 1;
             setTimeout(attempt, delay);
           } else {
-            // 더 이상 재시도 불가능 → 에러 상태로 저장
+            // 더 이상 재시도 불가 → 에러 상태로 저장
             setState({ status: "error", code: err.code, message: err.message });
             clearWatch();
           }

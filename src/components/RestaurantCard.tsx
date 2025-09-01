@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { spring } from "../lib/animations";
 import RatingStars from "./RatingStars";
 import type { Restaurant } from "../types";
+import { useFavorites } from "../lib/useFavorites";
 
 // 맛집 카드를 출력하는 컴포넌트, framer-motion 라이브러리를 사용했습니다.
 type Props = {
@@ -15,6 +16,18 @@ type Props = {
   UI(RestaurantCard): <img src={item.img} /> 로 실제 화면에 출력
 */
 export default function RestaurantCard({ item, onDetail }: Props) {
+  const { isFav, toggle } = useFavorites();
+  const liked = isFav(item.id);
+
+  const rating =
+    typeof item.rating === "number" && Number.isFinite(item.rating)
+      ? item.rating
+      : 0;
+  const distanceKm =
+    typeof item.distanceKm === "number" && Number.isFinite(item.distanceKm)
+      ? item.distanceKm
+      : 0;
+
   return (
     <motion.article
       layout
@@ -45,12 +58,12 @@ export default function RestaurantCard({ item, onDetail }: Props) {
             </p>
           </div>
           <div className="text-right">
-            <RatingStars value={item.rating} name={item.id} />
-            <div className="text-xs opacity-90">★ {item.rating.toFixed(1)}</div>
+            <RatingStars value={rating} name={String(item.id)} />
+            <div className="text-xs opacity-90">★ {rating.toFixed(1)}</div>
           </div>
         </div>
 
-        {item.tags && (
+        {item.tags?.length ? (
           <div className="flex flex-wrap gap-2">
             {item.tags.map((t) => (
               <div key={t} className="badge badge-outline">
@@ -58,10 +71,10 @@ export default function RestaurantCard({ item, onDetail }: Props) {
               </div>
             ))}
           </div>
-        )}
+        )  : null}
 
         <div className="card-actions items-center justify-between mt-auto">
-          <span className="text-xs opacity-90">약 {item.distanceKm.toFixed(1)}km</span>
+          <span className="text-xs opacity-90">약 {distanceKm < 1 ? `${Math.round(distanceKm * 1000)}m` : `${distanceKm.toFixed(1)}km`}</span>
           <div className="join">
             <button
               className="btn btn-sm join-item"
@@ -69,7 +82,18 @@ export default function RestaurantCard({ item, onDetail }: Props) {
             >
               자세히
             </button>
-            <button className="btn btn-sm btn-outline join-item">찜하기</button>
+            <button
+              className={`btn btn-sm join-item ${liked ? "btn-secondary" : "btn-outline"}`}
+              onClick={(e) => {
+                e.stopPropagation(); // 카드 클릭 등과 충돌 방지
+                toggle(item);
+              }}
+              aria-pressed={liked}
+              aria-label={liked ? "찜 해제" : "찜하기"}
+              title={liked ? "찜 해제" : "찜하기"}
+            >
+              {liked ? "찜" : "찜하기"}
+            </button>
           </div>
         </div>
       </div>

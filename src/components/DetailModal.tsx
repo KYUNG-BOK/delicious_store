@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Restaurant } from "../types";
 import { motion } from "framer-motion";
 import { reverseGeocodeKOR } from "../lib/reverseGeocodeKOR";
+import { useFavorites } from "../lib/useFavorites";
 
 type Props = {
   open: boolean;
@@ -11,6 +12,8 @@ type Props = {
 
 export default function DetailModal({ open, onClose, item }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const { isFav, toggle } = useFavorites();
+  const liked = item ? isFav(item.id) : false;
 
   // 역지오코딩 상태
   const [address, setAddress] = useState<string | null>(null);
@@ -170,8 +173,16 @@ export default function DetailModal({ open, onClose, item }: Props) {
           <button className="btn btn-outline" onClick={onClose}>
             닫기
           </button>
-          <button className="btn btn-primary">찜하기</button>
-        </div>
+          <button
+            className={`btn ${liked ? "btn-secondary" : "btn-primary"}`}
+            onClick={() => item && toggle(item)}
+            aria-pressed={liked}
+            aria-label={liked ? "찜 해제" : "찜하기"}
+            title={liked ? "찜 해제" : "찜하기"}
+          >
+            {liked ? "찜" : "찜하기"}
+          </button>        
+          </div>
       </div>
 
       {/* 바깥 클릭 닫기 */}
