@@ -10,7 +10,8 @@ import { CATEGORIES, type Restaurant, type BEPlace } from "../types";
 import { adaptPlace, FALLBACK } from "../lib/adapt";
 import DetailModal from "../components/DetailModal";
 import { useGeolocation } from "../lib/useGeolocation";
-
+import PlaceSuggestModal from "../components/PlaceSuggestModal";
+import type { PlaceSuggestion } from "../components/PlaceSuggestModal";
 
 export default function RestaurantMainPage() {
   const geo = useGeolocation({ enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
@@ -35,11 +36,34 @@ export default function RestaurantMainPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailItem, setDetailItem] = useState<Restaurant | null>(null);
 
+  const [openSuggest, setOpenSuggest] = useState(false);
+  const [toast, setToast] = useState<null | { type: "ok" | "err"; msg: string }>(null);
+
+
   const openDetail = (item: Restaurant) => {
     setDetailItem(item);
     setDetailOpen(true);
   };
   const closeDetail = () => setDetailOpen(false);
+
+
+async function submitSuggestion(data: PlaceSuggestion) {
+  try {
+    // 로컬 임시 저장 (확인용)
+    const key = "suggestions:places";
+    const raw = localStorage.getItem(key);
+    const arr = raw ? JSON.parse(raw) : [];
+    arr.unshift({ id: crypto.randomUUID(), createdAt: Date.now(), ...data });
+    localStorage.setItem(key, JSON.stringify(arr));
+
+    setToast({ type: "ok", msg: "임시 저장되었어요!" });
+  } catch (e: any) {
+    setToast({ type: "err", msg: e?.message ?? "제보 제출 중 오류가 발생했어요." });
+    throw e;
+  } finally {
+    setTimeout(() => setToast(null), 2200);
+  }
+}
 
   // 데이터 불러오기
   useEffect(() => {
@@ -183,6 +207,7 @@ export default function RestaurantMainPage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.96 }}
           className="btn btn-primary rounded-full shadow-lg"
+          onClick={() => setOpenSuggest(true)}
         >
           + 장소 제보
         </motion.button>
@@ -191,7 +216,36 @@ export default function RestaurantMainPage() {
       <BottomNav />
       <FooterBar />
 
-      <DetailModal open={detailOpen} onClose={closeDetail} item={detailItem} />
+      {/* 자세히 보기 모달 */}
+      <DetailModal 
+        open={detailOpen} 
+        onClose={closeDetail} 
+        item={detailItem} 
+      />
+
+      {/* 맛집 제보 모달 */}
+      <PlaceSuggestModal
+        open={openSuggest}
+        onClose={() => setOpenSuggest(false)}
+        onSubmit={submitSuggestion}
+      />
+
+      {/* Toast 알림 설정*/}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            key="suggest-toast"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 22 }}
+            className={`fixed bottom-6 right-6 z-[60] rounded-md px-4 py-2 shadow-lg
+            ${toast.type === "ok" ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"}`}
+          >
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
