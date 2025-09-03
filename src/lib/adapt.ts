@@ -11,6 +11,9 @@ import { IMG_BASE } from "./api";
     이렇게 변환해두면 UI 컴포넌트는 Restaurant 타입만 알면 돼서 깔끔해짐!
 */
 
+// 기본 위치: 서울시청 좌표
+const DEFAULT_ORIGIN = { lat: 37.5665, lon: 126.9780 };
+
 function stableRating(key: string) {
   let h = 2166136261;
   for (let i = 0; i < key.length; i++) {
@@ -72,13 +75,16 @@ export function adaptPlace(
 
   // 위도(lat), 경도(lon)가 숫자인지 확인 (좌표가 있어야 거리 계산 가능)
   const hasCoords = typeof p.lat === "number" && typeof p.lon === "number";
+  
+  // 위치 기준점: 사용자 위치(origin) → 없으면 서울시청 좌표
+  const base = origin ?? DEFAULT_ORIGIN;
 
   // 거리 계산
   const distanceKm =
-    origin && hasCoords
-      // 기준점(origin, 보통은 사용자 위치)과 좌표가 있으면 → haversineKm 함수로 실제 거리(km) 계산
-      ? haversineKm(origin.lat, origin.lon, p.lat!, p.lon!)
-      // 기준점이 없거나 좌표가 없으면 → 임시로 0.3km ~ 3.3km 사이의 랜덤 거리 넣기
+    hasCoords
+      // 좌표(lat/lon)가 있으면 → 기준점(origin, 즉 현재위치 못잡아오면 서울시청)과의 실제 거리(km) 계산
+      ? haversineKm(base.lat, base.lon, p.lat!, p.lon!)
+      // 좌표가 아예 없을경우 → 임시로 0.3km ~ 3.3km 사이의 랜덤 거리 넣기
       : Math.random() * 3 + 0.3;
 
   // 이미지 주소 만들기 (기본 경로 + 파일명)

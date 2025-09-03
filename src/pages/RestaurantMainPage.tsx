@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import RestaurantCard from "../components/RestaurantCard";
 import MapAside from "../components/MapAside";
-import BottomNav from "../components/BottomNav";
 import FooterBar from "../components/FooterBar";
 import { CATEGORIES, type Restaurant, type BEPlace } from "../types";
 import { adaptPlace, FALLBACK } from "../lib/adapt";
@@ -213,7 +212,6 @@ async function submitSuggestion(data: PlaceSuggestion) {
         </motion.button>
       </div>
 
-      <BottomNav />
       <FooterBar />
 
       {/* 자세히 보기 모달 */}

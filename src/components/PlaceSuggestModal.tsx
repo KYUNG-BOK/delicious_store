@@ -162,7 +162,7 @@ export default function PlaceSuggestModal({ open, onClose, onSubmit }: Props) {
           >
             {/* 헤더 */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-              <h3 className="text-lg font-semibold">혼자 알기엔 너무나 아까운 맛집을 알려주세요.</h3>
+              <h3 className="text-lg font-semibold">혼자 알기엔 너무나 아까운 여러분들의 맛집을 알려주세요.</h3>
               <button
                 onClick={onClose}
                 className="h-8 px-2 rounded-md bg-slate-800 hover:bg-slate-700"
